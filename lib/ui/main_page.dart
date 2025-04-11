@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
+import '../ui/home_page.dart';
+import '../ui/notification_page.dart';
+import '../ui/account_page.dart';
+
 import '../service/auth_service.dart';
 import '../service/token_service.dart';
 
 class MainPage extends StatefulWidget {
-  final String companyId;
-  final String name;
-  final String email;
+  final String username;
 
   const MainPage({
     super.key,
-    required this.companyId,
-    required this.name,
-    required this.email,
+    required this.username,
   });
 
   @override
@@ -75,9 +75,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   late final List<Widget> _bodyContent = [
-    // const HomePage(),
-    // const NotificationPage(),
-    // AccountPage(companyId: widget.companyId, name: widget.name, email: widget.email)
+    const HomePage(),
+    const NotificationPage(),
+    AccountPage(username: widget.username)
   ];
 
   void _changeIndex(int index) {
