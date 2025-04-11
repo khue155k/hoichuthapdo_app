@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../ui/change_password.dart';
+import '../ui/change_password_page.dart';
 import '../ui/login_page.dart';
 
 import '../service/auth_service.dart';

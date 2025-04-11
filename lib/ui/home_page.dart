@@ -1,5 +1,7 @@
+import 'package:app/ui/lich_su_HM_page.dart';
+import 'package:app/ui/thong_ke_page.dart';
 import 'package:flutter/material.dart';
-import '../ui/dang_ky_HM.dart';
+import '../ui/dang_ky_HM_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -35,6 +37,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.bar_chart,
               title: 'Xem thống kê',
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  ThongKePage(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 16),
@@ -43,6 +51,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.history,
               title: 'Xem lịch sử',
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  LichSuHienMauPage(),
+                  ),
+                );
               },
             ),
           ],
