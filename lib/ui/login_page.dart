@@ -73,7 +73,7 @@ class _FormContent extends StatefulWidget {
 }
 
 class __FormContentState extends State<_FormContent> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final storage = const FlutterSecureStorage();
 
@@ -86,39 +86,34 @@ class __FormContentState extends State<_FormContent> {
   void initState() {
     super.initState();
     _checkLoginStatus();
-    _loadSaveEmail();
+    _loadSaveUsername();
   }
 
-  Future<void> _loadSaveEmail() async {
-    String? savedEmail = await storage.read(key: 'saved_email');
+  Future<void> _loadSaveUsername() async {
+    String? savedUsername = await storage.read(key: 'saved_username');
 
-    if (savedEmail != null) {
+    if (savedUsername != null) {
       setState(() {
-        _emailController.text = savedEmail;
+        _usernameController.text = savedUsername;
       });
     }
   }
 
   Future<void> _checkLoginStatus() async {
     bool isLoggedIn = await _authService.isLoggedIn();
-    final String companyId;
-    final String name;
-    final String email;
+    final String username;
     if (isLoggedIn) {
       final token = await _authService.getToken() ?? "";
       final payload = _authService.decodeToken(token) ?? {};
-      companyId = payload['nameid'];
-      name = payload['given_name'];
-      email = payload['email'];
+      debugPrint(payload.toString());
+      username = payload['unique_name'];
 
       Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
             builder: (context) => MainPage(
-                  companyId: companyId,
-                  name: name,
-                  email: email,
+                username: username,
                 )),
       );
     }
@@ -137,26 +132,18 @@ class __FormContentState extends State<_FormContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextFormField(
-              controller: _emailController,
+              controller: _usernameController,
               validator: (value) {
-                // add email validation
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-
-                bool emailValid = RegExp(
-                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                    .hasMatch(value);
-                if (!emailValid) {
-                  return 'Please enter a valid email';
+                  return 'Nhập tên tài khoản';
                 }
 
                 return null;
               },
               decoration: const InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
-                prefixIcon: Icon(Icons.email_outlined),
+                labelText: 'Tài khoản',
+                hintText: 'Nhập tên tài khoản',
+                prefixIcon: Icon(Icons.person_outlined),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -165,7 +152,7 @@ class __FormContentState extends State<_FormContent> {
               controller: _passwordController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Nhập mật khẩu';
                 }
 
                 // if (value.length < 6) {
@@ -175,8 +162,8 @@ class __FormContentState extends State<_FormContent> {
               },
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
+                  labelText: 'Mật khẩu',
+                  hintText: 'Nhập mật khẩu',
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
@@ -221,14 +208,17 @@ class __FormContentState extends State<_FormContent> {
                 ),
                 onPressed: () async {
                   try {
-                    String email = _emailController.text;
+                    String username = _usernameController.text;
                     String password = _passwordController.text;
+                    debugPrint(username.toString());
+                    debugPrint(password.toString());
 
                     if (_formKey.currentState?.validate() ?? false) {
                       final isloggedIn = await _authService.login(
-                        email: email,
+                        username: username,
                         password: password,
                       );
+                      debugPrint(isloggedIn.toString());
                       if (isloggedIn) {
                         _checkLoginStatus();
                       } else {

@@ -24,17 +24,18 @@ class AuthService {
     return false;
   }
 
-  Future<bool> login({required String email, required String password}) async {
+  Future<bool> login({required String username, required String password}) async {
     try {
       final response = await http.post(apiUri,
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode({'email': email, 'password': password}));
-
+          body: jsonEncode({'username': username, 'password': password}));
       if (response.statusCode == 200) {
         var resBody = jsonDecode(response.body);
-        String token = resBody['token'];
+        debugPrint(resBody.toString());
+
+        String token = resBody['data']['token'];
         await saveToken(token);
         return true;
       }
@@ -46,7 +47,7 @@ class AuthService {
 
   Future<void> saveToken(String token) async {
     Map<String, dynamic> payload = decodeToken(token) ?? {};
-    await storage.write(key: 'saved_email', value: payload['email']);
+    await storage.write(key: 'saved_username', value: payload['username']);
     return storage.write(key: 'auth_token', value: token);
   }
 
