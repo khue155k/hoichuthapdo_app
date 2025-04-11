@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/dang_ky_HM.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -20,7 +21,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.favorite,
               title: 'Đăng ký hiến máu',
               onTap: () {
-                // Điều hướng tới màn hình đăng ký hiến máu
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DangKyHienMauPage(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 16),
@@ -29,7 +35,6 @@ class HomePage extends StatelessWidget {
               icon: Icons.bar_chart,
               title: 'Xem thống kê',
               onTap: () {
-                // Điều hướng tới màn hình thống kê
               },
             ),
             const SizedBox(height: 16),
@@ -38,7 +43,6 @@ class HomePage extends StatelessWidget {
               icon: Icons.history,
               title: 'Xem lịch sử',
               onTap: () {
-                // Điều hướng tới màn hình lịch sử
               },
             ),
           ],
@@ -49,13 +53,14 @@ class HomePage extends StatelessWidget {
 
   Widget _buildMenuCard(BuildContext context,
       {required IconData icon,
-        required String title,
-        required VoidCallback onTap}) {
+      required String title,
+      required VoidCallback onTap}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         leading: Icon(icon, size: 32, color: Theme.of(context).primaryColor),
         title: Text(title, style: const TextStyle(fontSize: 18)),
         trailing: const Icon(Icons.arrow_forward_ios),

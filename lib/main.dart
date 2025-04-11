@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Hội viên',
+      title: 'Hội chữ thập đỏ',
       theme: ThemeData(
         useMaterial3: true,
       ),

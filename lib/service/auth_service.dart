@@ -33,7 +33,6 @@ class AuthService {
           body: jsonEncode({'username': username, 'password': password}));
       if (response.statusCode == 200) {
         var resBody = jsonDecode(response.body);
-        debugPrint(resBody.toString());
 
         String token = resBody['data']['token'];
         await saveToken(token);
