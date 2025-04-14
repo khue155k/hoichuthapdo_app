@@ -4,6 +4,7 @@ import '../service/auth_service.dart';
 import '../api_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class DangKyHienMauPage extends StatefulWidget {
   const DangKyHienMauPage({super.key});
@@ -16,16 +17,18 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
   final _formKey = GlobalKey<FormState>();
   final addressService = AddressService();
   final authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    fetchDotHM();
     fetchProvinces();
     fetchCoQuan();
     fetchTheTich();
   }
 
-  String? gioiTinh, coQuan, theTich, tinh, huyen, xa;
+  String? gioiTinh, coQuan, theTich, tinh, huyen, xa, dotHienMau;
   final cccdController = TextEditingController();
   final hoTenController = TextEditingController();
   final sdtController = TextEditingController();
@@ -36,6 +39,47 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
   final List<String> gioiTinhOptions = ['Nam', 'Nữ'];
   List<dynamic> coQuanOptions = [];
   List<dynamic> theTichOptions = [];
+  List<dynamic> dotHienMauOptions = [];
+
+  Future<List<dynamic>> getDotHM() async {
+    final authService = AuthService();
+    final token = await authService.getToken();
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/DotHienMau'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> allDots = jsonDecode(response.body)['data'];
+
+      final now = DateTime.now();
+
+      final List<dynamic> validDots = allDots.where((dot) {
+        final thoiGianKetThuc = DateTime.parse(dot['thoiGianKetThuc']);
+        return thoiGianKetThuc.isAfter(now);
+      }).toList();
+
+      return validDots;
+    } else {
+      throw Exception('Không lấy được danh sách đợt hiến máu');
+    }
+  }
+
+  Future<void> fetchDotHM() async {
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+      dotHienMauOptions = await getDotHM();
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<List<dynamic>> getCoQuan() async {
     final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/DonVi'));
@@ -48,7 +92,6 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
 
   Future<void> fetchCoQuan() async {
     coQuanOptions = await getCoQuan();
-    debugPrint(coQuanOptions.toString());
     setState(() {});
   }
 
@@ -56,7 +99,6 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
     final response =
         await http.get(Uri.parse('${ApiConfig.baseUrl}/DotHienMau/TheTichMH'));
     if (response.statusCode == 200) {
-      debugPrint(jsonDecode(response.body).toString());
       return jsonDecode(response.body)['data'];
     } else {
       throw Exception('Không lấy được danh sách thê tích máu hiến');
@@ -157,158 +199,202 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Đăng ký hiến máu')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text("Thông tin cá nhân",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _buildTextField(
-                          label: 'CCCD', controller: cccdController),
-                      _buildTextField(
-                          label: 'Họ tên', controller: hoTenController),
-                      _buildDatePicker(),
-                      _buildDropdown(
-                          label: 'Giới tính',
-                          value: gioiTinh,
-                          items: gioiTinhOptions,
-                          onChanged: (val) => setState(() => gioiTinh = val)),
-                      _buildTextField(
-                          label: 'Số điện thoại', controller: sdtController),
-                      _buildTextFieldNoR(
-                          label: 'Email', controller: emailController),
-                    ],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : dotHienMauOptions.isEmpty
+              ? const Center(
+                  child: Text('Hiện tại không có đợt hiến máu nào để đăng ký.',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildDropdownLong(
+                          label: 'Chọn đợt hiến máu',
+                          value: dotHienMau,
+                          items: dotHienMauOptions.map<String>((e) {
+                            final tenDot = e['tenDot'];
+                            final diaDiem = e['diaDiem'];
+                            final thoiGianBatDau = DateFormat('dd/MM/yyyy')
+                                .format(DateTime.parse(e['thoiGianBatDau']));
+                            final thoiGianKetThuc = DateFormat('dd/MM/yyyy')
+                                .format(DateTime.parse(e['thoiGianKetThuc']));
+                            print(e);
+                            return '$tenDot - $diaDiem ($thoiGianBatDau - $thoiGianKetThuc)';
+                          }).toList(),
+                          onChanged: (val) => setState(() => dotHienMau = val),
+                        ),
+                        if (dotHienMau != null) ...{
+                          const Text("Thông tin cá nhân",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  _buildTextField(
+                                      label: 'CCCD',
+                                      controller: cccdController),
+                                  _buildTextField(
+                                      label: 'Họ tên',
+                                      controller: hoTenController),
+                                  _buildDatePicker(),
+                                  _buildDropdown(
+                                      label: 'Giới tính',
+                                      value: gioiTinh,
+                                      items: gioiTinhOptions,
+                                      onChanged: (val) =>
+                                          setState(() => gioiTinh = val)),
+                                  _buildTextField(
+                                      label: 'Số điện thoại',
+                                      controller: sdtController),
+                                  _buildTextFieldNoR(
+                                      label: 'Email',
+                                      controller: emailController),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text("Địa chỉ thường trú",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  _buildDropdown(
+                                      label: 'Tỉnh/Thành',
+                                      value: tinh,
+                                      items: provinces
+                                          .map<String>(
+                                              (e) => e['name'].toString())
+                                          .toList(),
+                                      onChanged: (val) {
+                                        setState(() {
+                                          tinh = val;
+                                          huyen = xa = null;
+                                          selectedProvinceId = provinces
+                                              .firstWhere((e) =>
+                                                  e['name'] ==
+                                                  val)['provinceId']
+                                              .toString();
+                                          fetchDistricts(selectedProvinceId!);
+                                        });
+                                      }),
+                                  _buildDropdown(
+                                      label: 'Quận/Huyện',
+                                      value: huyen,
+                                      items: districts
+                                          .map<String>(
+                                              (e) => e['name'].toString())
+                                          .toList(),
+                                      onChanged: (val) {
+                                        setState(() {
+                                          huyen = val;
+                                          xa = null;
+                                          selectedDistrictId = districts
+                                              .firstWhere((e) =>
+                                                  e['name'] ==
+                                                  val)['districtId']
+                                              .toString();
+                                          fetchWards(selectedDistrictId!);
+                                        });
+                                      }),
+                                  _buildDropdown(
+                                      label: 'Phường/Xã',
+                                      value: xa,
+                                      items: wards
+                                          .map<String>(
+                                              (e) => e['name'].toString())
+                                          .toList(),
+                                      onChanged: (val) {
+                                        setState(() {
+                                          xa = val;
+                                          selectedWardId = wards
+                                              .firstWhere((e) =>
+                                                  e['name'] == val)['wardId']
+                                              .toString();
+                                        });
+                                      }),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text("Thông tin đăng ký hiến máu",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  _buildTextField(
+                                      label: 'Nơi ở hiện tại',
+                                      controller: noiOController),
+                                  _buildTextField(
+                                      label: 'Nghề nghiệp hiện tại',
+                                      controller: ngheNghiepController),
+                                  _buildDropdown(
+                                      label: 'Cơ quan',
+                                      value: coQuan,
+                                      items: coQuanOptions
+                                          .map<String>(
+                                              (e) => e['tenDV'].toString())
+                                          .toList(),
+                                      onChanged: (val) =>
+                                          setState(() => coQuan = val)),
+                                  _buildDateTimePicker(
+                                      label: 'Thời gian đăng ký'),
+                                  _buildDropdown(
+                                      label: 'Thể tích',
+                                      value: theTich,
+                                      items: theTichOptions
+                                          .map<String>(
+                                              (e) => e['label'].toString())
+                                          .toList(),
+                                      onChanged: (val) =>
+                                          setState(() => theTich = val)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: _dangKy,
+                            icon: const Icon(Icons.check_circle),
+                            label: const Text('Gửi đăng ký'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16),
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                            ),
+                          )
+                        }
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text("Địa chỉ thường trú",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _buildDropdown(
-                          label: 'Tỉnh/Thành',
-                          value: tinh,
-                          items: provinces
-                              .map<String>((e) => e['name'].toString())
-                              .toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              tinh = val;
-                              huyen = xa = null;
-                              selectedProvinceId = provinces
-                                  .firstWhere(
-                                      (e) => e['name'] == val)['provinceId']
-                                  .toString();
-                              fetchDistricts(selectedProvinceId!);
-                            });
-                          }),
-                      _buildDropdown(
-                          label: 'Quận/Huyện',
-                          value: huyen,
-                          items: districts
-                              .map<String>((e) => e['name'].toString())
-                              .toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              huyen = val;
-                              xa = null;
-                              selectedDistrictId = districts
-                                  .firstWhere(
-                                      (e) => e['name'] == val)['districtId']
-                                  .toString();
-                              fetchWards(selectedDistrictId!);
-                            });
-                          }),
-                      _buildDropdown(
-                          label: 'Phường/Xã',
-                          value: xa,
-                          items: wards
-                              .map<String>((e) => e['name'].toString())
-                              .toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              xa = val;
-                              selectedWardId = wards
-                                  .firstWhere((e) => e['name'] == val)['wardId']
-                                  .toString();
-                            });
-                          }),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("Thông tin đăng ký hiến máu",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _buildTextField(
-                          label: 'Nơi ở hiện tại', controller: noiOController),
-                      _buildTextField(
-                          label: 'Nghề nghiệp hiện tại',
-                          controller: ngheNghiepController),
-                      _buildDropdown(
-                          label: 'Cơ quan',
-                          value: coQuan,
-                          items: coQuanOptions
-                              .map<String>((e) => e['tenDV'].toString())
-                              .toList(),
-                          onChanged: (val) => setState(() => coQuan = val)),
-                      _buildDateTimePicker(label: 'Thời gian đăng ký'),
-                      _buildDropdown(
-                          label: 'Thể tích',
-                          value: theTich,
-                          items: theTichOptions
-                              .map<String>((e) => e['label'].toString())
-                              .toList(),
-                          onChanged: (val) => setState(() => theTich = val)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _dangKy,
-                icon: const Icon(Icons.check_circle),
-                label: const Text('Gửi đăng ký'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16),
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -338,7 +424,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
       if (cccd != null) {
         final hienMauData = {
           "id": 0,
-          "maDot": 1,
+          "maDot": dotHienMau,
           "CCCD": cccd,
           "maTheTich": selectedTheTich['value'],
           "maDV": selectedCoQuan['maDV'],
@@ -364,6 +450,18 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')));
     }
+  }
+
+  Widget _buildProgressIndicator() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Opacity(
+          opacity: _isLoading ? 1.0 : 00,
+          child: const CircularProgressIndicator(),
+        ),
+      ),
+    );
   }
 
   Widget _buildTextField(
@@ -407,6 +505,41 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
         items: items
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
+        onChanged: onChanged,
+        validator: (value) => value == null ? 'Vui lòng chọn $label' : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdownLong({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
+        value: value,
+        isExpanded: true,
+        items: items.map((e) {
+          return DropdownMenuItem<String>(
+            value: e,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 300),
+              child: Text(
+                e,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          );
+        }).toList(),
         onChanged: onChanged,
         validator: (value) => value == null ? 'Vui lòng chọn $label' : null,
       ),

@@ -71,7 +71,7 @@ class _ThongKePageState extends State<ThongKePage> {
     }
     if (thongKe == null) {
       return const Scaffold(
-        body: Center(child: Text("Không thể tải dữ liệu.")),
+        body: Center(child: Text("Không có dữ liệu.")),
       );
     }
 

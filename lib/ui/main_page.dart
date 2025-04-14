@@ -1,5 +1,9 @@
+import 'package:app/api_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../ui/home_page.dart';
 import '../ui/notification_page.dart';
@@ -22,18 +26,15 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
-  late final String apikeyOneSignal;
   @override
   void initState() {
-    _listenTokenExpiry();
-    // apikeyOneSignal = dotenv.env['API_KEY_ONESIGNAL']!;
     super.initState();
-    OneSignal.Debug.setLogLevel(OSLogLevel.verbose);//debug
-    OneSignal.initialize('3b4635bd-6b3b-4d8a-85f4-ca3161daba43');
-    OneSignal.Notifications.requestPermission(true);
+
+    _listenTokenExpiry();
+    initOneSignal();
   }
 
-  _listenTokenExpiry() async{
+  _listenTokenExpiry() async {
     AuthService authService = AuthService();
     DateTime expiryTime = DateTime.now();
     String? token = await authService.getToken();
@@ -44,7 +45,7 @@ class _MainPageState extends State<MainPage> {
         expiryTime = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
       }
     }
-    debugPrint(expiryTime.toString());
+
     TokenService tokenService = TokenService(expiryTime);
     tokenService.tokenExpiredStream.listen((expired) {
       if (expired) {
@@ -111,5 +112,48 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+}
+Future<void> initOneSignal() async {
+  final appIdOneSignal = dotenv.env['APP_ID_ONESIGNAL']!;
+  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  OneSignal.initialize(appIdOneSignal);
+  OneSignal.Notifications.requestPermission(true).then((granted) {
+    print("🔔 Permission granted: $granted");
+  });
+
+  OneSignal.User.pushSubscription.addObserver((state) {
+    if (state.current?.id != null) {
+      updatePlayerIdToServer(state.current!.id!);
+    }
+  });
+
+  Future.delayed(const Duration(seconds: 5), () {
+    final id = OneSignal.User.pushSubscription.id;
+    updatePlayerIdToServer(id!);
+  });
+}
+
+Future<void> updatePlayerIdToServer(String onesignalID) async {
+  final authService = AuthService();
+
+  final token = await authService.getToken();
+  final payload = authService.decodeToken(token!);
+  final TaiKhoan_ID = int.tryParse(payload!['nameid'].toString());
+
+  final response = await http.put(
+    Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/updateOnesignalID'),
+    headers: {      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'TaiKhoan_ID': TaiKhoan_ID,
+      'OneSiginal_ID': onesignalID,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('onesignalID đã cập nhật lên server');
+  } else {
+    print('Lỗi khi cập nhật onesignalID');
   }
 }

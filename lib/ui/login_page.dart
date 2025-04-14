@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../service/auth_service.dart';
 import 'main_page.dart';
@@ -46,7 +47,7 @@ class _Logo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FlutterLogo(size: isSmallScreen ? 100 : 200),
+        Image.asset('assets/logo.png', width: 120, height: 120),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
@@ -86,10 +87,18 @@ class __FormContentState extends State<_FormContent> {
   void initState() {
     super.initState();
     _checkLoginStatus();
-    _loadSaveUsername();
+    _loadUsername();
   }
 
-  Future<void> _loadSaveUsername() async {
+  Future<void> _saveUsername(String username) async {
+    await storage.write(key: 'saved_username', value: username);
+  }
+
+  Future<void> _deleteUsername() async {
+    await storage.delete(key: 'saved_username');
+  }
+
+  Future<void> _loadUsername() async {
     String? savedUsername = await storage.read(key: 'saved_username');
 
     if (savedUsername != null) {
@@ -101,19 +110,20 @@ class __FormContentState extends State<_FormContent> {
 
   Future<void> _checkLoginStatus() async {
     bool isLoggedIn = await _authService.isLoggedIn();
-    final String username;
     if (isLoggedIn) {
-      final token = await _authService.getToken() ?? "";
-      final payload = _authService.decodeToken(token) ?? {};
-      debugPrint(payload.toString());
-      username = payload['unique_name'];
+
+      if (_rememberMe) {
+        _saveUsername(_usernameController.text);
+      } else {
+        _deleteUsername();
+      }
 
       Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
             builder: (context) => MainPage(
-                username: username,
+                  username: _usernameController.text,
                 )),
       );
     }
@@ -186,7 +196,7 @@ class __FormContentState extends State<_FormContent> {
                   _rememberMe = value;
                 });
               },
-              title: const Text('Remember me'),
+              title: const Text('Nhớ tài khoản'),
               controlAffinity: ListTileControlAffinity.leading,
               dense: true,
               contentPadding: const EdgeInsets.all(0),
@@ -210,15 +220,12 @@ class __FormContentState extends State<_FormContent> {
                   try {
                     String username = _usernameController.text;
                     String password = _passwordController.text;
-                    debugPrint(username.toString());
-                    debugPrint(password.toString());
 
                     if (_formKey.currentState?.validate() ?? false) {
                       final isloggedIn = await _authService.login(
                         username: username,
                         password: password,
                       );
-                      debugPrint(isloggedIn.toString());
                       if (isloggedIn) {
                         _checkLoginStatus();
                       } else {

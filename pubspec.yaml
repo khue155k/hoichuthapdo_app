@@ -42,6 +42,7 @@ dependencies:
   intl_utils: ^2.8.7
   onesignal_flutter: ^5.2.7
   flutter_dotenv: ^5.2.1
+  flutter_svg: ^2.0.17
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,7 @@ flutter:
     - assets/avatar_placeholder.png
     - assets/img_placeholder.png
     - .env
+    - assets/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

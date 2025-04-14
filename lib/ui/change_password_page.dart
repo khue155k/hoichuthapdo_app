@@ -67,7 +67,7 @@ class _FormContentState extends State<_FormContent> {
               style: const TextStyle(color: Colors.black),
               enabled: false,
               decoration: const InputDecoration(
-                labelText: 'Email',
+                labelText: 'Username',
                 prefixIcon: Icon(Icons.person_outlined),
                 border: OutlineInputBorder(),
               ),
@@ -148,7 +148,7 @@ class _FormContentState extends State<_FormContent> {
               },
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
-                  labelText: 'Mật khẩu mới',
+                  labelText: 'Nhập lại mật khẩu mới',
                   hintText: 'Nhập lại mật khẩu mới',
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   border: const OutlineInputBorder(),
@@ -183,19 +183,25 @@ class _FormContentState extends State<_FormContent> {
                     if (_formKey.currentState!.validate()) {
                       String oldPassword = _oldPasswordController.text;
                       String newPassword = _newPasswordController.text;
-                      _authService.deleteToken();
+
+                      final authService = AuthService();
+                      final token = await authService.getToken();
+
                       final response = await http.post(
                           Uri.parse(
-                              '${ApiConfig.baseUrl}/Login/change-password'),
-                          headers: <String, String>{
-                            'Content-Type': 'application/json; charset=UTF-8',
+                              '${ApiConfig.baseUrl}/Login/ChangePassword'),
+                          headers: {
+                            'Authorization': 'Bearer $token',
+                            'Content-Type': 'application/json',
                           },
                           body: jsonEncode({
                             'username': widget.username,
                             'oldPassword': oldPassword,
                             'newPassword': newPassword
                           }));
+
                       if (response.statusCode == 200) {
+                        _authService.deleteToken();
 
                         showDialog(
                           context: context,
