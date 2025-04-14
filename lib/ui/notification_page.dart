@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app/service/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -14,15 +15,13 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   bool _isLoading = false;
-  List<Notification> _notiList = [];
+  List<ThongBao> _thongBaoList = [];
   int _currentPage = 1;
   final int _pageSize = 10;
   int? _totalItem;
-  String _searchTitle = '';
+  String _searchString = '';
   late ScrollController _sc;
 
-  String? _selectedStatus = 'Chưa đóng';
-  int _selectedStatusNum = 1;
   Timer? _debounce;
 
   @override
@@ -44,33 +43,31 @@ class _NotificationPageState extends State<NotificationPage> {
     super.dispose();
   }
 
-  void _onSelectedChanged(String? newValue) {
-    _selectedStatus = newValue;
-    _notiList = [];
-    _totalItem = null;
-    _fetchNoti();
-  }
-
   Future<void> _fetchNoti() async {
-    if (_totalItem != null && _notiList.length == _totalItem) return;
+    final authService = AuthService();
+    if (_totalItem != null && _thongBaoList.length == _totalItem) return;
+
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
       });
-      _selectedStatus == "Chưa đóng"
-          ? _selectedStatusNum = 1
-          : _selectedStatusNum = 0;
-
-      final response = await http.get(Uri.parse(
-          '${ApiConfig.baseUrl}/Notification/notificationByTitleStatus?title=$_searchTitle&status=$_selectedStatusNum&pageNumber=$_currentPage&pageSize=$_pageSize'));
+      final token = await authService.getToken();
+      final response = await http.get(
+        Uri.parse(
+            '${ApiConfig.baseUrl}/ThongBao/search?string_tim_kiem=$_searchString&pageSize=$_pageSize&currentPage=$_currentPage'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final resBody = json.decode(response.body);
 
-        final listItems = resBody['items'] as List;
-        _notiList.addAll(
-            listItems.map((noti) => Notification.fromJson((noti))).toList());
+        final listItems = resBody['data']['items'] as List;
+        _thongBaoList.addAll(
+            listItems.map((TB) => ThongBao.fromJson((TB))).toList());
 
-        _totalItem = resBody['totalNotis'];
+        _totalItem = resBody['data']['totalCount'];
 
         _currentPage++;
       }
@@ -106,57 +103,35 @@ class _NotificationPageState extends State<NotificationPage> {
         backgroundColor: Colors.white,
         elevation: 1,
         title: Container(
-            width: double.infinity,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8.0),
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: TextField(
+            onChanged: (value) {
+              _searchString = value;
+              _thongBaoList = [];
+              _totalItem = null;
+              _currentPage = 1;
+
+              if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+              _debounce = Timer(const Duration(milliseconds: 300), () {
+                _fetchNoti();
+              });
+            },
+            decoration: const InputDecoration(
+              hintText: 'Tìm kiếm...',
+              hintStyle: TextStyle(color: Colors.grey),
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.search, color: Colors.grey),
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(width: 1),
-                    ),
-                    child: Dropdown(
-                      selectedValue: _selectedStatus,
-                      onSelectedChanged: _onSelectedChanged,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 7,
-                  child: TextField(
-                    onChanged: (value) {
-                      _searchTitle = value;
-                      _notiList = [];
-                      _totalItem = null;
-                      _fetchNoti();
-
-                      if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-                      _debounce = Timer(const Duration(milliseconds: 300), () {
-                        _fetchNoti();
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Tìm kiếm...',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              ],
-            )),
+          ),
+        ),
       ),
-      body: _notiList.isEmpty
+      body: _thongBaoList.isEmpty
           ? const Center(
               child: Text('Không tìm thấy thông báo.',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)))
@@ -169,53 +144,70 @@ class _NotificationPageState extends State<NotificationPage> {
                   constraints: const BoxConstraints(maxWidth: 400),
                   child: ListView.separated(
                     controller: _sc,
-                    itemCount: _notiList.length + 1,
+                    itemCount: _thongBaoList.length + 1,
                     separatorBuilder: (BuildContext context, int index) {
                       return const Divider();
                     },
                     itemBuilder: (BuildContext context, int index) {
-                      if (index == _notiList.length) {
+                      if (index == _thongBaoList.length) {
                         return _buildProgressIndicator();
                       }
-                      final item = _notiList[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (item.title != null)
-                                  Expanded(
-                                    child: Text(item.title!,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: Colors.black)),
+                      final item = _thongBaoList[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 3,
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều dọc
+                                children: [
+                                  Icon(
+                                    Icons.notifications,
+                                    color: Colors.redAccent,
+                                    size: 24,
                                   ),
-                                Text(timeAgo(item.update_at),
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall),
-                              ],
-                            ),
-                            if (item.message != null) Text(item.message!),
-                            if (item.img_url != null)
-                              Container(
-                                height: 200,
-                                margin: const EdgeInsets.only(top: 8.0),
-                                child: FadeInImage.assetNetwork(
-                                  placeholder: 'assets/img_placeholder.png',
-                                  image: item.img_url!,
-                                  imageErrorBuilder:
-                                      (context, error, stackTrace) =>
-                                          Image.asset(
-                                    'assets/img_placeholder.png',
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        if (item.tieuDe != null)
+                                          Text(
+                                            item.tieuDe!,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 18,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          timeAgo(item.thoiGianGui),
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+                              if (item.noiDung != null)
+                                Text(
+                                  item.noiDung!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.black87,
+                                    fontSize: 16,
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -281,35 +273,34 @@ class _DropdownState extends State<Dropdown> {
   ];
 }
 
-class Notification {
-  int id;
-  int admin_id;
-  String? title;
-  String? message;
-  String? img_url;
-  DateTime send_at;
-  DateTime update_at;
-  int status;
+class ThongBao {
+  int maTB;
+  String? tieuDe;
+  String? noiDung;
+  DateTime thoiGianGui;
 
-  Notification(
-      {required this.id,
-      required this.admin_id,
-      this.title,
-      this.message,
-      this.img_url,
-      required this.send_at,
-      required this.update_at,
-      required this.status});
+  ThongBao({
+    required this.maTB,
+    this.tieuDe,
+    this.noiDung,
+    required this.thoiGianGui,
+  });
 
-  factory Notification.fromJson(Map<String, dynamic> map) {
-    return Notification(
-        id: map['id'],
-        admin_id: map['admin_id'],
-        title: map['title'],
-        message: map['message'],
-        img_url: map['img_url'],
-        send_at: DateTime.parse(map['send_at']),
-        update_at: DateTime.parse(map['update_at']),
-        status: map['status']);
+  factory ThongBao.fromJson(Map<String, dynamic> json) {
+    return ThongBao(
+      maTB: json['maTB'],
+      tieuDe: json['tieuDe'],
+      noiDung: json['noiDung'],
+      thoiGianGui: DateTime.parse(json['thoiGianGui']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'maTB': maTB,
+      'tieuDe': tieuDe,
+      'noiDung': noiDung,
+      'thoiGianGui': thoiGianGui.toIso8601String(),
+    };
   }
 }
