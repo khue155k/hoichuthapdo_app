@@ -27,7 +27,7 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
 
     final token = await authService.getToken();
     final payload = authService.decodeToken(token!);
-    final accId = int.tryParse(payload!['nameid'].toString());
+    final accId = payload!['nameid'].toString();
 
     final url =
         Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/LichSu/${accId}');
@@ -40,10 +40,9 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 && jsonDecode(response.body)['code'] == 200) {
       setState(() {
-        lichSu = json.decode(response.body);
-        print(lichSu);
+        lichSu = json.decode(response.body)['data'];
         _isLoading = false;
       });
     } else {
@@ -61,13 +60,50 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
+        appBar: AppBar(title: const Text("Lịch sử hiến máu")),
         body: Center(child: CircularProgressIndicator()),
       );
     }
     if (lichSu.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text("Chưa có lịch sử hiến máu.")),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Lịch sử hiến máu"),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.history_toggle_off,
+                  size: 80,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Chưa có lịch sử hiến máu",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[1000],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Hãy tham gia một đợt hiến máu để có lịch sử tại đây.",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -99,7 +135,18 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
                   ),
                   Text("💧 Thể tích: ${item['theTich']} ml"),
                   Text("📍 Địa điểm: ${item['diaDiem'] ?? 'Không rõ'}"),
-                  Text("✅ Kết quả: ${item['ketQua'] ?? 'Không có'}"),
+                  Builder(
+                    builder: (context) {
+                      final String ketQua = item['ketQua'] ?? 'Không có';
+                      String icon = '';
+                      if (ketQua == 'Đã hiến') {
+                        icon = ' ✅';
+                      } else if (ketQua == 'Chưa hiến' || ketQua == 'Từ chối') {
+                        icon = ' ❌';
+                      }
+                      return Text("📄 Kết quả: $ketQua$icon");
+                    },
+                  ),
                 ],
               ),
             ),
