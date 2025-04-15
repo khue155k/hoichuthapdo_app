@@ -62,16 +62,16 @@ class _NotificationPageState extends State<NotificationPage> {
       );
       if (response.statusCode == 200) {
         final resBody = json.decode(response.body);
+        if (resBody['code'] == 200) {
+          final listItems = resBody['data']['items'] as List;
+          _thongBaoList
+              .addAll(listItems.map((TB) => ThongBao.fromJson((TB))).toList());
 
-        final listItems = resBody['data']['items'] as List;
-        _thongBaoList.addAll(
-            listItems.map((TB) => ThongBao.fromJson((TB))).toList());
+          _totalItem = resBody['data']['totalCount'];
 
-        _totalItem = resBody['data']['totalCount'];
-
-        _currentPage++;
+          _currentPage++;
+        }
       }
-
       setState(() {
         _isLoading = false;
       });
@@ -154,16 +154,19 @@ class _NotificationPageState extends State<NotificationPage> {
                       }
                       final item = _thongBaoList[index];
                       return Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 3,
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều dọc
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .center, // Căn giữa theo chiều dọc
                                 children: [
                                   Icon(
                                     Icons.notifications,
@@ -173,7 +176,8 @@ class _NotificationPageState extends State<NotificationPage> {
                                   const SizedBox(width: 15),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         if (item.tieuDe != null)
                                           Text(
@@ -187,24 +191,29 @@ class _NotificationPageState extends State<NotificationPage> {
                                         const SizedBox(height: 4),
                                         Text(
                                           timeAgo(item.thoiGianGui),
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Colors.grey[600],
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Colors.grey[600],
+                                              ),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 12),
                               if (item.noiDung != null)
                                 Text(
                                   item.noiDung!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.black87,
-                                    fontSize: 16,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
                                 ),
                             ],
                           ),

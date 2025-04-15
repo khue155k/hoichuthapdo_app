@@ -10,7 +10,7 @@ Future<ThongKe> fetchThongKe() async {
 
   final token = await authService.getToken();
   final payload = authService.decodeToken(token!);
-  final accId = int.tryParse(payload!['nameid'].toString());
+  final accId = payload!['nameid'].toString();
 
   final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/ThongKe/${accId}');
 
@@ -22,9 +22,9 @@ Future<ThongKe> fetchThongKe() async {
     },
   );
 
-  if (response.statusCode == 200) {
+  if (response.statusCode == 200 && json.decode(response.body)['code'] == 200) {
     final jsonData = json.decode(response.body);
-    return ThongKe.fromJson(jsonData);
+    return ThongKe.fromJson(jsonData['data']);
   } else {
     throw Exception('Lỗi khi tải thống kê');
   }
@@ -38,7 +38,7 @@ class ThongKePage extends StatefulWidget {
 }
 
 class _ThongKePageState extends State<ThongKePage> {
-  late ThongKe thongKe;
+  ThongKe? thongKe = null;
   bool isLoading = true;
 
   @override
@@ -55,7 +55,6 @@ class _ThongKePageState extends State<ThongKePage> {
         isLoading = false;
       });
     } catch (e) {
-      print("Lỗi: $e");
       setState(() {
         isLoading = false;
       });
@@ -65,18 +64,52 @@ class _ThongKePageState extends State<ThongKePage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
+      return Scaffold(
+        appBar: AppBar(title: const Text("Thống kê cá nhân")),
         body: Center(child: CircularProgressIndicator()),
       );
     }
     if (thongKe == null) {
-      return const Scaffold(
-        body: Center(child: Text("Không có dữ liệu.")),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Thống kê cá nhân"),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.bar_chart_rounded,
+                  size: 80,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Không có dữ liệu thống kê",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[1000],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Bạn cần tham gia hiến máu để xem thống kê tại đây.",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
-
-    // final lanCuoi = DateTime.parse(thongKe.lanCuoiHien.toString()).toLocal();
-    // final formattedDate = DateFormat('dd/MM/yyyy - HH:mm').format(lanCuoi);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Thống kê cá nhân")),
@@ -88,34 +121,34 @@ class _ThongKePageState extends State<ThongKePage> {
               icon: Icons.bloodtype,
               iconColor: Colors.red,
               title: "Số lần hiến máu",
-              value: "${thongKe.soLanHien} lần",
+              value: "${thongKe!.soLanHien} lần",
             ),
             _buildCard(
               icon: Icons.water_drop,
               iconColor: Colors.blue,
               title: "Tổng lượng máu đã hiến",
-              value: "${thongKe.tongLuongMau} ml",
+              value: "${thongKe!.tongLuongMau} ml",
             ),
             _buildCard(
               icon: Icons.access_time,
               iconColor: Colors.orange,
               title: "Lần hiến gần nhất",
-              value: thongKe.lanCuoiHien != null
+              value: thongKe!.lanCuoiHien != null
                   ? DateFormat('dd/MM/yyyy - HH:mm')
-                      .format(DateTime.parse(thongKe.lanCuoiHien.toString()))
+                      .format(DateTime.parse(thongKe!.lanCuoiHien.toString()))
                   : "Chưa có",
             ),
             _buildCard(
               icon: Icons.emoji_events,
               iconColor: Colors.amber[800]!,
               title: "Thành tích",
-              value: thongKe.danhHieu.toString(),
+              value: thongKe!.danhHieu.toString(),
             ),
             _buildCard(
               icon: Icons.card_giftcard,
               iconColor: Colors.purple,
               title: "Số quà đã nhận",
-              value: "${thongKe.soQuaDaNhan} phần quà",
+              value: "${thongKe!.soQuaDaNhan} phần quà",
             ),
           ],
         ),

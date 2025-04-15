@@ -1,3 +1,4 @@
+import 'package:app/ui/userInfo_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../ui/change_password_page.dart';
@@ -26,38 +27,21 @@ class AccountPage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 400),
           child: ListView(
             children: [
-              // _SingleSection(
-              //   children: [
-              //     _CustomListTile(
-              //       title: "Thông tin doanh nghiệp",
-              //       icon: Icons.business,
-              //       function: () {
-              //         Navigator.push(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) =>
-              //                 CompanyDetail(companyId: companyId),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //     _CustomListTile(
-              //       title: "Hội phí",
-              //       icon: Icons.paid,
-              //       function: () {
-              //         Navigator.push(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) =>
-              //                 MembershipFeePage(companyId: companyId),
-              //           ),
-              //         );
-              //       },
-              //     ),
-              //   ],
-              // ),
               _SingleSection(
                 children: [
+                  _CustomListTile(
+                    title: "Thông tin cá nhân",
+                    icon: Icons.person,
+                    function: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              UserInfoPagePage(),
+                        ),
+                      );
+                    },
+                  ),
                   _CustomListTile(
                     title: "Đổi mật khẩu",
                     icon: Icons.lock,

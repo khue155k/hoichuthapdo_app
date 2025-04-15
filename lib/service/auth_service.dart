@@ -10,7 +10,7 @@ import '../api_config.dart';
 import '../main.dart';
 
 class AuthService {
-  final apiUri = Uri.parse("${ApiConfig.baseUrl}/Login");
+  final apiUri = Uri.parse("${ApiConfig.baseUrl}/Account/Login");
   final storage = const FlutterSecureStorage();
 
   Future<bool> isLoggedIn() async {
@@ -24,7 +24,8 @@ class AuthService {
     return false;
   }
 
-  Future<bool> login({required String username, required String password}) async {
+  Future<bool> login(
+      {required String username, required String password}) async {
     try {
       final response = await http.post(apiUri,
           headers: <String, String>{
@@ -33,10 +34,11 @@ class AuthService {
           body: jsonEncode({'username': username, 'password': password}));
       if (response.statusCode == 200) {
         var resBody = jsonDecode(response.body);
-
-        String token = resBody['data']['token'];
-        await saveToken(token);
-        return true;
+        if (resBody['code'] == 200) {
+          String token = resBody['data']['token'];
+          await saveToken(token);
+          return true;
+        }
       }
       return false;
     } catch (e) {

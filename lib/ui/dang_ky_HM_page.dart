@@ -223,7 +223,6 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
                                 .format(DateTime.parse(e['thoiGianBatDau']));
                             final thoiGianKetThuc = DateFormat('dd/MM/yyyy')
                                 .format(DateTime.parse(e['thoiGianKetThuc']));
-                            print(e);
                             return '$tenDot - $diaDiem ($thoiGianBatDau - $thoiGianKetThuc)';
                           }).toList(),
                           onChanged: (val) => setState(() => dotHienMau = val),
@@ -533,7 +532,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
               constraints: BoxConstraints(maxWidth: 300),
               child: Text(
                 e,
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 14),
               ),

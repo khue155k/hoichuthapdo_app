@@ -67,7 +67,7 @@ class _FormContentState extends State<_FormContent> {
               style: const TextStyle(color: Colors.black),
               enabled: false,
               decoration: const InputDecoration(
-                labelText: 'Username',
+                labelText: 'Tài khoản',
                 prefixIcon: Icon(Icons.person_outlined),
                 border: OutlineInputBorder(),
               ),
@@ -77,7 +77,7 @@ class _FormContentState extends State<_FormContent> {
               controller: _oldPasswordController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Nhập mật khẩu cũ';
                 }
                 return null;
               },
@@ -103,11 +103,19 @@ class _FormContentState extends State<_FormContent> {
               controller: _newPasswordController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Nhập mật khẩu mới';
                 }
-
                 if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
+                  return 'Mật khẩu phải có ít nhất 6 kí tự';
+                }
+                if (!RegExp(r'[^a-zA-Z0-9]').hasMatch(value)) {
+                  return 'Mật khẩu phải chứa ít nhất một ký tự không phải chữ cái';
+                }
+                if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                  return 'Mật khẩu phải có ít nhất một chữ hoa';
+                }
+                if (!RegExp(r'[a-z]').hasMatch(value)) {
+                  return 'Mật khẩu phải có ít nhất một chữ thường';
                 }
                 return null;
               },
@@ -133,22 +141,17 @@ class _FormContentState extends State<_FormContent> {
               controller: _confirmPasswordController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Nhập lại mật khẩu mới';
                 }
-
-                if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
-                }
-
                 if (_confirmPasswordController.text !=
                     _newPasswordController.text) {
-                  return 'Mật khẩu cũ và mới phải giống nhau';
+                  return 'Mật khẩu mới và xác nhận mật khẩu mới phải giống nhau';
                 }
                 return null;
               },
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
-                  labelText: 'Nhập lại mật khẩu mới',
+                  labelText: 'Xác nhận mật khẩu mới',
                   hintText: 'Nhập lại mật khẩu mới',
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   border: const OutlineInputBorder(),
@@ -189,7 +192,7 @@ class _FormContentState extends State<_FormContent> {
 
                       final response = await http.post(
                           Uri.parse(
-                              '${ApiConfig.baseUrl}/Login/ChangePassword'),
+                              '${ApiConfig.baseUrl}/Acount/ChangePassword'),
                           headers: {
                             'Authorization': 'Bearer $token',
                             'Content-Type': 'application/json',
@@ -200,7 +203,7 @@ class _FormContentState extends State<_FormContent> {
                             'newPassword': newPassword
                           }));
 
-                      if (response.statusCode == 200) {
+                      if (response.statusCode == 200 && jsonDecode(response.body)['code'] == 200) {
                         _authService.deleteToken();
 
                         showDialog(

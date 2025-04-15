@@ -1,3 +1,4 @@
+import 'package:app/ui/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,27 +14,29 @@ class LoginPage extends StatelessWidget {
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-        body: Center(
-            child: isSmallScreen
-                ? const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _Logo(),
-                      _FormContent(),
-                    ],
-                  )
-                : Container(
-                    padding: const EdgeInsets.all(32.0),
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: const Row(
-                      children: [
-                        Expanded(child: _Logo()),
-                        Expanded(
-                          child: Center(child: _FormContent()),
-                        ),
-                      ],
+      body: Center(
+        child: isSmallScreen
+            ? const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _Logo(),
+                  _FormContent(),
+                ],
+              )
+            : Container(
+                padding: const EdgeInsets.all(32.0),
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: const Row(
+                  children: [
+                    Expanded(child: _Logo()),
+                    Expanded(
+                      child: Center(child: _FormContent()),
                     ),
-                  )));
+                  ],
+                ),
+              ),
+      ),
+    );
   }
 }
 
@@ -111,7 +114,6 @@ class __FormContentState extends State<_FormContent> {
   Future<void> _checkLoginStatus() async {
     bool isLoggedIn = await _authService.isLoggedIn();
     if (isLoggedIn) {
-
       if (_rememberMe) {
         _saveUsername(_usernameController.text);
       } else {
@@ -165,9 +167,6 @@ class __FormContentState extends State<_FormContent> {
                   return 'Nhập mật khẩu';
                 }
 
-                // if (value.length < 6) {
-                //   return 'Password must be at least 6 characters';
-                // }
                 return null;
               },
               obscureText: !_isPasswordVisible,
@@ -196,7 +195,10 @@ class __FormContentState extends State<_FormContent> {
                   _rememberMe = value;
                 });
               },
-              title: const Text('Nhớ tài khoản'),
+              title: const Text(
+                'Nhớ tài khoản',
+                style: TextStyle(fontSize: 16),
+              ),
               controlAffinity: ListTileControlAffinity.leading,
               dense: true,
               contentPadding: const EdgeInsets.all(0),
@@ -212,8 +214,11 @@ class __FormContentState extends State<_FormContent> {
                 child: const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
-                    'Sign in',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    'Đăng nhập',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF26A69A)),
                   ),
                 ),
                 onPressed: () async {
@@ -241,6 +246,34 @@ class __FormContentState extends State<_FormContent> {
                 },
               ),
             ),
+            _gap(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RegisterPage(),
+                    ),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    'Đăng ký',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF42A5F5)),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -255,7 +288,7 @@ class __FormContentState extends State<_FormContent> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Thông báo'),
-          content: Text(message),
+          content: Text(message, style: TextStyle(fontSize: 16),),
           actions: [
             TextButton(
               onPressed: () {

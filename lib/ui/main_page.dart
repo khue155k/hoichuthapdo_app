@@ -114,12 +114,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
+
 Future<void> initOneSignal() async {
   final appIdOneSignal = dotenv.env['APP_ID_ONESIGNAL']!;
-  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  // OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   OneSignal.initialize(appIdOneSignal);
+
   OneSignal.Notifications.requestPermission(true).then((granted) {
-    print("🔔 Permission granted: $granted");
+    // print("🔔 Permission granted: $granted");
   });
 
   OneSignal.User.pushSubscription.addObserver((state) {
@@ -139,21 +141,23 @@ Future<void> updatePlayerIdToServer(String onesignalID) async {
 
   final token = await authService.getToken();
   final payload = authService.decodeToken(token!);
-  final TaiKhoan_ID = int.tryParse(payload!['nameid'].toString());
+  final TaiKhoan_ID = payload!['nameid'].toString();
 
   final response = await http.put(
     Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/updateOnesignalID'),
-    headers: {      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'},
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json'
+    },
     body: jsonEncode({
       'TaiKhoan_ID': TaiKhoan_ID,
       'OneSiginal_ID': onesignalID,
     }),
   );
 
-  if (response.statusCode == 200) {
-    print('onesignalID đã cập nhật lên server');
-  } else {
-    print('Lỗi khi cập nhật onesignalID');
-  }
+  // if (response.statusCode == 200) {
+  //   print('onesignalID đã cập nhật lên server');
+  // } else {
+  //   print('Lỗi khi cập nhật onesignalID');
+  // }
 }
