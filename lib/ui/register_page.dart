@@ -1,12 +1,9 @@
 import 'package:app/api_config.dart';
-import 'package:app/ui/login_page.dart';
 import 'package:app/ui/verify_email_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import '../service/auth_service.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -60,37 +57,12 @@ class __FormContentState extends State<_FormContent> {
   final TextEditingController _cccdController = TextEditingController();
 
   final storage = const FlutterSecureStorage();
-
-  final _authService = AuthService();
-
   bool _isPasswordVisible = false;
-  bool _rememberMe = false;
 
   @override
   void initState() {
     super.initState();
   }
-
-  // Future<void> _checkLoginStatus() async {
-  //   bool isLoggedIn = await _authService.isLoggedIn();
-  //   if (isLoggedIn) {
-  //
-  //     if (_rememberMe) {
-  //       _saveUsername(_usernameController.text);
-  //     } else {
-  //       _deleteUsername();
-  //     }
-  //
-  //     Navigator.pushReplacement(
-  //       // ignore: use_build_context_synchronously
-  //       context,
-  //       MaterialPageRoute(
-  //           builder: (context) => MainPage(
-  //             username: _usernameController.text,
-  //           )),
-  //     );
-  //   }
-  // }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -263,7 +235,8 @@ class __FormContentState extends State<_FormContent> {
                           }));
 
                       if (response.statusCode == 200) {
-                        if (jsonDecode(response.body)['code'] == 200) {
+                        final resBody = jsonDecode(response.body);
+                        if (resBody['code'] == 200) {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -287,6 +260,9 @@ class __FormContentState extends State<_FormContent> {
                               );
                             },
                           );
+                        }
+                        if (resBody['code'] == 400){
+                          _showAlertDialog(resBody['message']);
                         }
                       } else {
                         _showAlertDialog('Có lỗi xảy ra vui lòng thử lại sau');

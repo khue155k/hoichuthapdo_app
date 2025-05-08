@@ -54,7 +54,7 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
 
   String formatDateTime(String dateTimeStr) {
     final dateTime = DateTime.parse(dateTimeStr).toLocal();
-    return DateFormat("dd/MM/yyyy - HH:mm").format(dateTime);
+    return DateFormat("HH:mm - dd/MM/yyyy").format(dateTime);
   }
 
   @override

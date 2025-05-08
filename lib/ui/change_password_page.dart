@@ -192,7 +192,7 @@ class _FormContentState extends State<_FormContent> {
 
                       final response = await http.post(
                           Uri.parse(
-                              '${ApiConfig.baseUrl}/Acount/ChangePassword'),
+                              '${ApiConfig.baseUrl}/Account/ChangePassword'),
                           headers: {
                             'Authorization': 'Bearer $token',
                             'Content-Type': 'application/json',
@@ -202,11 +202,12 @@ class _FormContentState extends State<_FormContent> {
                             'oldPassword': oldPassword,
                             'newPassword': newPassword
                           }));
-
-                      if (response.statusCode == 200 && jsonDecode(response.body)['code'] == 200) {
+                      final body = jsonDecode(response.body);
+                      if (response.statusCode == 200 && body['code'] == 200) {
                         _authService.deleteToken();
 
                         showDialog(
+                          // ignore: use_build_context_synchronously
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
@@ -229,8 +230,10 @@ class _FormContentState extends State<_FormContent> {
                           },
                         );
                       }
-                      if (response.statusCode == 401) {
-                        _showAlertDialog('Mật khẩu cũ không chính xác. Vui lòng nhập lại');
+                      else if (body['code'] == 400) {
+                        _showAlertDialog(body['message']);
+                      } else {
+                        _showAlertDialog('Có lỗi sảy ra. Vui lòng thử lại sau');
                       }
                     }
                   } catch (e) {

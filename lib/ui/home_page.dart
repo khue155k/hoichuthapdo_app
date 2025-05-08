@@ -1,3 +1,5 @@
+import 'package:app/ui/chatbot_page.dart';
+import 'package:app/ui/dot_hm_dk_page.dart';
 import 'package:app/ui/lich_su_HM_page.dart';
 import 'package:app/ui/thong_ke_page.dart';
 import 'package:flutter/material.dart';
@@ -13,55 +15,85 @@ class HomePage extends StatelessWidget {
         title: const Text('Trang chủ'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMenuCard(
-              context,
-              icon: Icons.favorite,
-              title: 'Đăng ký hiến máu',
-              onTap: () {
-                Navigator.push(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildMenuCard(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const DangKyHienMauPage(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildMenuCard(
-              context,
-              icon: Icons.bar_chart,
-              title: 'Xem thống kê',
-              onTap: () {
-                Navigator.push(
+                  icon: Icons.favorite,
+                  title: 'Đăng ký hiến máu',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DangKyHienMauPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildMenuCard(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>  ThongKePage(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildMenuCard(
-              context,
-              icon: Icons.history,
-              title: 'Xem lịch sử',
-              onTap: () {
-                Navigator.push(
+                  icon: Icons.fact_check,
+                  title: 'Đợt hiến máu đã đăng ký',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DotHienMauDangKyPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildMenuCard(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>  LichSuHienMauPage(),
-                  ),
-                );
-              },
+                  icon: Icons.bar_chart,
+                  title: 'Xem thống kê',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ThongKePage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.history,
+                  title: 'Xem lịch sử',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LichSuHienMauPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.smart_toy,
+                  title: 'Chat bot AI',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatbotPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        )
     );
   }
 

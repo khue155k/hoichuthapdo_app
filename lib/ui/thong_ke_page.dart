@@ -66,7 +66,7 @@ class _ThongKePageState extends State<ThongKePage> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text("Thống kê cá nhân")),
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (thongKe == null) {

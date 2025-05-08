@@ -21,6 +21,7 @@ class _NotificationPageState extends State<NotificationPage> {
   int? _totalItem;
   String _searchString = '';
   late ScrollController _sc;
+  late String cccd;
 
   Timer? _debounce;
 
@@ -52,9 +53,12 @@ class _NotificationPageState extends State<NotificationPage> {
         _isLoading = true;
       });
       final token = await authService.getToken();
+      final payload = authService.decodeToken(token!);
+      final accId = payload!['nameid'].toString();
+
       final response = await http.get(
         Uri.parse(
-            '${ApiConfig.baseUrl}/ThongBao/search?string_tim_kiem=$_searchString&pageSize=$_pageSize&currentPage=$_currentPage'),
+            '${ApiConfig.baseUrl}/ThongBao/searchByAccId/$accId?string_tim_kiem=$_searchString&pageSize=$_pageSize&currentPage=$_currentPage'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -215,6 +219,20 @@ class _NotificationPageState extends State<NotificationPage> {
                                         fontSize: 16,
                                       ),
                                 ),
+                              if (item.linkAnh != null)
+                                Container(
+                                  height: 200,
+                                  margin: const EdgeInsets.only(top: 8.0),
+                                  child: FadeInImage.assetNetwork(
+                                    placeholder: 'assets/img_placeholder.png',
+                                    image: item.linkAnh!,
+                                    imageErrorBuilder:
+                                        (context, error, stackTrace) =>
+                                        Image.asset(
+                                          'assets/img_placeholder.png',
+                                        ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -286,12 +304,14 @@ class ThongBao {
   int maTB;
   String? tieuDe;
   String? noiDung;
+  String? linkAnh;
   DateTime thoiGianGui;
 
   ThongBao({
     required this.maTB,
     this.tieuDe,
     this.noiDung,
+    this.linkAnh,
     required this.thoiGianGui,
   });
 
@@ -300,6 +320,7 @@ class ThongBao {
       maTB: json['maTB'],
       tieuDe: json['tieuDe'],
       noiDung: json['noiDung'],
+      linkAnh: json['linkAnh'],
       thoiGianGui: DateTime.parse(json['thoiGianGui']),
     );
   }
@@ -309,6 +330,7 @@ class ThongBao {
       'maTB': maTB,
       'tieuDe': tieuDe,
       'noiDung': noiDung,
+      'linkAnh': linkAnh,
       'thoiGianGui': thoiGianGui.toIso8601String(),
     };
   }

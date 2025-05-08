@@ -1,7 +1,6 @@
 import 'package:app/ui/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../service/auth_service.dart';
 import 'main_page.dart';

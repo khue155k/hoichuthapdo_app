@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:dio/dio.dart';
-import 'package:app/service/auth_service.dart';
 
-import 'service/token_service.dart';
 import 'ui/login_page.dart';
 import 'ui/register_page.dart';
 

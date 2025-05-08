@@ -1,4 +1,4 @@
-import 'package:app/ui/userInfo_page.dart';
+import 'package:app/ui/user_info_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../ui/change_password_page.dart';
@@ -37,7 +37,7 @@ class AccountPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              UserInfoPagePage(),
+                              const UserInfoPage(),
                         ),
                       );
                     },

@@ -143,7 +143,7 @@ Future<void> updatePlayerIdToServer(String onesignalID) async {
   final payload = authService.decodeToken(token!);
   final TaiKhoan_ID = payload!['nameid'].toString();
 
-  final response = await http.put(
+  await http.put(
     Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/updateOnesignalID'),
     headers: {
       'Authorization': 'Bearer $token',
@@ -154,10 +154,4 @@ Future<void> updatePlayerIdToServer(String onesignalID) async {
       'OneSiginal_ID': onesignalID,
     }),
   );
-
-  // if (response.statusCode == 200) {
-  //   print('onesignalID đã cập nhật lên server');
-  // } else {
-  //   print('Lỗi khi cập nhật onesignalID');
-  // }
 }

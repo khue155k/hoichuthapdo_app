@@ -30,8 +30,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           }),
         );
 
-        if (response.statusCode == 200) {
-          // Xác thực thành công, điều hướng về trang đăng nhập
+        if (response.statusCode == 200 && json.decode(response.body)['code'] == 200) {
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -41,9 +40,10 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => const LoginPage()),
+                            (Route<dynamic> route) => false,
                       );
                     },
                     child: const Text('OK'),
