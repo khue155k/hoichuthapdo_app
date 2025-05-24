@@ -32,12 +32,11 @@ class AccountPage extends StatelessWidget {
                   _CustomListTile(
                     title: "Thông tin cá nhân",
                     icon: Icons.person,
-                    function: () {
-                      Navigator.push(
+                    function: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const UserInfoPage(),
+                          builder: (context) => const UserInfoPage(),
                         ),
                       );
                     },
@@ -45,8 +44,8 @@ class AccountPage extends StatelessWidget {
                   _CustomListTile(
                     title: "Đổi mật khẩu",
                     icon: Icons.lock,
-                    function: () {
-                      Navigator.push(
+                    function: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
@@ -62,13 +61,12 @@ class AccountPage extends StatelessWidget {
                   _CustomListTile(
                     title: "Đăng xuất",
                     icon: Icons.exit_to_app,
-                    function: () {
-                      authService.deleteToken();
-                      Navigator.push(
+                    function: () async {
+                      await authService.deleteToken();
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const LoginPage(),
+                          builder: (context) => const LoginPage(),
                         ),
                       );
                     },
@@ -88,13 +86,14 @@ class _CustomListTile extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget? trailing;
-  final void Function()? function;
+  final Future<void> Function()? function;
 
-  const _CustomListTile(
-      {required this.title,
-      required this.icon,
-      this.trailing,
-      this.function});
+  const _CustomListTile({
+    required this.title,
+    required this.icon,
+    this.trailing,
+    this.function,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +101,11 @@ class _CustomListTile extends StatelessWidget {
       title: Text(title),
       leading: Icon(icon),
       trailing: trailing ?? const Icon(CupertinoIcons.forward, size: 18),
-      onTap: function,
+      onTap: () async {
+        if (function != null) {
+          await function!();
+        }
+      },
     );
   }
 }
@@ -113,7 +116,8 @@ class _SingleSection extends StatelessWidget {
 
   const _SingleSection({
     // ignore: unused_element
-    required this.children, this.title,
+    required this.children,
+    this.title,
   });
 
   @override

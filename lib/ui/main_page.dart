@@ -1,6 +1,5 @@
 import 'package:app/api_config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -116,42 +115,46 @@ class _MainPageState extends State<MainPage> {
 }
 
 Future<void> initOneSignal() async {
-  final appIdOneSignal = dotenv.env['APP_ID_ONESIGNAL']!;
-  // OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-  OneSignal.initialize(appIdOneSignal);
+  // OneSignal.User.pushSubscription.addObserver((state) {
+  //   if (state.current?.id != null) {
+  //     updatePlayerIdToServer(state.current!.id!);
+  //   }
+  // });
 
-  OneSignal.Notifications.requestPermission(true).then((granted) {
-    // print("🔔 Permission granted: $granted");
-  });
-
-  OneSignal.User.pushSubscription.addObserver((state) {
-    if (state.current?.id != null) {
-      updatePlayerIdToServer(state.current!.id!);
-    }
-  });
-
-  Future.delayed(const Duration(seconds: 5), () {
+  Future.doWhile(() async {
     final id = OneSignal.User.pushSubscription.id;
-    updatePlayerIdToServer(id!);
+    if (id == null) return true;
+
+    final success = await updatePlayerIdToServer(id);
+    if (success) {
+      return false;
+    } else {
+      await Future.delayed(const Duration(seconds: 5));
+      return true;
+    }
   });
 }
 
-Future<void> updatePlayerIdToServer(String onesignalID) async {
-  final authService = AuthService();
+Future<bool> updatePlayerIdToServer(String onesignalID) async {
+  try {
+    final authService = AuthService();
+    final token = await authService.getToken();
+    final payload = authService.decodeToken(token!);
+    final TaiKhoan_ID = payload!['nameid'].toString();
 
-  final token = await authService.getToken();
-  final payload = authService.decodeToken(token!);
-  final TaiKhoan_ID = payload!['nameid'].toString();
-
-  await http.put(
-    Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/updateOnesignalID'),
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    },
-    body: jsonEncode({
-      'TaiKhoan_ID': TaiKhoan_ID,
-      'OneSiginal_ID': onesignalID,
-    }),
-  );
+    var res = await http.put(
+      Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/updateOnesignalID'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({
+        'TaiKhoan_ID': TaiKhoan_ID,
+        'OneSiginal_ID': onesignalID,
+      }),
+    );
+    return res.statusCode == 200;
+  } catch (e) {
+    return false;
+  }
 }

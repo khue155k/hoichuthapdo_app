@@ -90,7 +90,7 @@ class _DotHienMauDangKyPageState extends State<DotHienMauDangKyPage> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text("Đợt hiến máu đã đăng ký")),
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (dotHM.isEmpty) {

@@ -172,7 +172,7 @@ class _NotificationPageState extends State<NotificationPage> {
                                 crossAxisAlignment: CrossAxisAlignment
                                     .center, // Căn giữa theo chiều dọc
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.notifications,
                                     color: Colors.redAccent,
                                     size: 24,

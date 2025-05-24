@@ -19,7 +19,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
   final authService = AuthService();
   bool _isLoading = false;
   bool daHienMau = false;
-  Map<String, dynamic>? TNV;
+  Map<String, dynamic>? tnv;
 
   @override
   void initState() {
@@ -104,13 +104,13 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
     final payload = authService.decodeToken(token!);
     final accId = payload!['nameid'].toString();
 
-    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/${accId}');
+    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/$accId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
-        TNV = jsonData['data'];
+        tnv = jsonData['data'];
         _isLoading = false;
       });
     } else {
@@ -159,7 +159,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
     final payload = authService.decodeToken(token!);
     final accId = payload!['nameid'].toString();
 
-    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/${accId}');
+    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/$accId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -270,7 +270,6 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(body['message'])));
       } else {
-        print(res.body);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Có lỗi khi đăng ký hiến máu')));
       }
@@ -340,7 +339,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
                             const Text("Thông tin cá nhân",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 12),
+                            _gap(12),
                             Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
@@ -354,9 +353,9 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
                                           const EdgeInsets.only(bottom: 12),
                                       child: TextFormField(
                                         controller: cccdController,
-                                        decoration: InputDecoration(
+                                        decoration: const InputDecoration(
                                             labelText: 'CCCD',
-                                            border: const OutlineInputBorder()),
+                                            border: OutlineInputBorder()),
                                         validator: (value) =>
                                             value == null || value.isEmpty
                                                 ? 'Vui lòng nhập cccd'
@@ -384,11 +383,11 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            _gap(16),
                             const Text("Địa chỉ thường trú",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 12),
+                            _gap(12),
                             Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
@@ -455,12 +454,12 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16)
+                            _gap(16),
                           },
                           const Text("Thông tin đăng ký hiến máu",
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12),
+                          _gap(12),
                           Card(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
@@ -529,7 +528,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
 
         final hienMauData = {
           "maDot": selectedDotHienMau,
-          "cccd": TNV!['cccd'],
+          "cccd": tnv!['cccd'],
           "maTheTich": selectedTheTich['value'],
           "maDV": selectedCoQuan['maDV'],
           "ngheNghiep": ngheNghiepController.text,
@@ -567,7 +566,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
 
         final tnData = {
           "hoTen": hoTenController.text,
-          "ngaySinh": "${selectedNgaySinh!.toIso8601String()}",
+          "ngaySinh": selectedNgaySinh!.toIso8601String(),
           "cccd": cccdController.text,
           "gioiTinh": gioiTinh,
           "soDienThoai": sdtController.text,
@@ -615,6 +614,8 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
           const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')));
     }
   }
+
+  Widget _gap(double height) => SizedBox(height: height);
 
   Widget _buildTextField(
       {required String label, required TextEditingController controller}) {
@@ -674,7 +675,7 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
         value: value,
         isExpanded: true,
@@ -682,12 +683,12 @@ class _DangKyHienMauPageState extends State<DangKyHienMauPage> {
           return DropdownMenuItem<String>(
             value: e,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 300),
+              constraints: const BoxConstraints(maxWidth: 300),
               child: Text(
                 e,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 14),
               ),
             ),
           );

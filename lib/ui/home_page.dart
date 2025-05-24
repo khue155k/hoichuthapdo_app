@@ -57,7 +57,7 @@ class HomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ThongKePage(),
+                        builder: (context) => const ThongKePage(),
                       ),
                     );
                   },
@@ -71,7 +71,7 @@ class HomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LichSuHienMauPage(),
+                        builder: (context) => const LichSuHienMauPage(),
                       ),
                     );
                   },
@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ChatbotPage(),
+                        builder: (context) => const ChatbotPage(),
                       ),
                     );
                   },

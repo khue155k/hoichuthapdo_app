@@ -13,7 +13,7 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  Map<String, dynamic>? TNV;
+  Map<String, dynamic>? tnv;
   bool isLoading = true;
 
   @override
@@ -33,17 +33,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
     final payload = authService.decodeToken(token!);
     final accId = payload!['nameid'].toString();
 
-    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/${accId}');
+    final url = Uri.parse('${ApiConfig.baseUrl}/TinhNguyenVien/accId/$accId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final resBody = json.decode(response.body);
       if (resBody['code'] == 200) {
         setState(() {
-          TNV = resBody['data'];
-          fetchTinh(TNV!['maTinhThanh']);
-          fetchHuyen(TNV!['maQuanHuyen']);
-          fetchXa(TNV!['maPhuongXa']);
+          tnv = resBody['data'];
+          fetchTinh(tnv!['maTinhThanh']);
+          fetchHuyen(tnv!['maQuanHuyen']);
+          fetchXa(tnv!['maPhuongXa']);
           isLoading = false;
         });
       }
@@ -61,7 +61,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   Future<void> fetchTinh(int id) async {
     final url =
-        Uri.parse('${ApiConfig.baseUrl}/Address/province?provinceId=${id}');
+        Uri.parse('${ApiConfig.baseUrl}/Address/province?provinceId=$id');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -79,7 +79,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   Future<void> fetchHuyen(int id) async {
     final url =
-        Uri.parse('${ApiConfig.baseUrl}/Address/district?districtId=${id}');
+        Uri.parse('${ApiConfig.baseUrl}/Address/district?districtId=$id');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -96,7 +96,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   Future<void> fetchXa(int id) async {
-    final url = Uri.parse('${ApiConfig.baseUrl}/Address/ward?wardId=${id}');
+    final url = Uri.parse('${ApiConfig.baseUrl}/Address/ward?wardId=$id');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -120,7 +120,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : TNV == null
+          : tnv == null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
@@ -146,7 +146,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    DangKyHienMauPage(), // thay bằng màn đăng ký của bạn
+                                    const DangKyHienMauPage(), // thay bằng màn đăng ký của bạn
                               ),
                             );
                           },
@@ -183,22 +183,22 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 24),
-                          _buildRowWithIcon(Icons.badge, 'CCCD', TNV!['cccd']),
+                          _buildRowWithIcon(Icons.badge, 'CCCD', tnv!['cccd']),
                           _divider(),
                           _buildRowWithIcon(
-                              Icons.person, 'Họ tên', TNV!['hoTen']),
+                              Icons.person, 'Họ tên', tnv!['hoTen']),
                           _divider(),
                           _buildRowWithIcon(Icons.cake, 'Ngày sinh',
-                              formatNgay(TNV!['ngaySinh'])),
+                              formatNgay(tnv!['ngaySinh'])),
                           _divider(),
                           _buildRowWithIcon(
-                              Icons.wc, 'Giới tính', TNV!['gioiTinh']),
+                              Icons.wc, 'Giới tính', tnv!['gioiTinh']),
                           _divider(),
                           _buildRowWithIcon(
-                              Icons.phone, 'SĐT', TNV!['soDienThoai']),
+                              Icons.phone, 'SĐT', tnv!['soDienThoai']),
                           _divider(),
                           _buildRowWithIcon(Icons.email, 'Email',
-                              TNV!['email'] ?? 'Không có'),
+                              tnv!['email'] ?? 'Không có'),
                           _divider(),
                           _buildRowWithIcon(Icons.location_city, 'Địa chỉ',
                               "$phuongXa, $quanHuyen, $tinhThanh"),

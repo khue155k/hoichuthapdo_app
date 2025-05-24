@@ -38,7 +38,7 @@ class ThongKePage extends StatefulWidget {
 }
 
 class _ThongKePageState extends State<ThongKePage> {
-  ThongKe? thongKe = null;
+  ThongKe? thongKe;
   bool isLoading = true;
 
   @override

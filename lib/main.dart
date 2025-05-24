@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'ui/login_page.dart';
 import 'ui/register_page.dart';
@@ -10,6 +11,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
+  final appIdOneSignal = dotenv.env['APP_ID_ONESIGNAL']!;
+  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  OneSignal.initialize(appIdOneSignal);
+  OneSignal.Notifications.requestPermission(true).then((granted) {
+    // print("🔔 Permission granted: $granted");
+  });
   runApp(const MyApp());
 }
 

@@ -62,7 +62,7 @@ class _LichSuHienMauPageState extends State<LichSuHienMauPage> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text("Lịch sử hiến máu")),
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (lichSu.isEmpty) {

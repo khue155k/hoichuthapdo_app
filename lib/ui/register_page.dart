@@ -293,7 +293,7 @@ class __FormContentState extends State<_FormContent> {
           title: const Text('Thông báo'),
           content: Text(
             message,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
           actions: [
             TextButton(

@@ -287,7 +287,7 @@ class __FormContentState extends State<_FormContent> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Thông báo'),
-          content: Text(message, style: TextStyle(fontSize: 16),),
+          content: Text(message, style: const TextStyle(fontSize: 16),),
           actions: [
             TextButton(
               onPressed: () {

@@ -33,6 +33,9 @@ class AuthService {
         var resBody = jsonDecode(response.body);
         if (resBody['code'] == 200) {
           String token = resBody['data']['token'];
+          final payload = decodeToken(token);
+          final role = payload!['role'].toString();
+          if (role != 'user') return false;
           await saveToken(token);
           return true;
         }
