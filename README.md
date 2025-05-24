@@ -6,17 +6,19 @@
 
 ## 🚀 Tính năng chính
 
-- ✅ Quản lý thông tin tình nguyện viên
+- ✅ Xem tin tình nguyện viên
 - ✅ Đăng ký và theo dõi lịch sử hiến máu
 - ✅ Nhận thông báo về các đợt hiến máu sắp tới
-- ✅ Tích hợp bản đồ địa lý để tìm kiếm điểm hiến máu gần nhất
+- ✅ Xem thống kê hiến máu
+- ✅ Nhắc nhở đến ngày hiến máu
+- ✅ Chúc mừng sinh nhật tình nguyện viên
 
 ## 🛠️ Công nghệ sử dụng
 
 - **Frontend**: Flutter
 - **Ngôn ngữ**: Dart
 - **Quản lý gói**: pub
-- **Thư viện**: Firebase, Google Maps, Local Notifications
+- **Thư viện**: Firebase, Local Notifications
 
 ## ⚙️ Cài đặt và chạy dự án
 
